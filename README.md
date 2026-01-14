@@ -1,6 +1,6 @@
 Welcome to the sample project that demonstrates the integration of the
 [Texas Instruments (TI) SDK](https://www.ti.com/tool/download/SIMPLELINK-LOWPOWER-F3-SDK)
-with the [HubbleNetwork-SDK](https://github.com/HubbleNetwork/sdk). This
+with the [HubbleNetwork-SDK](https://github.com/HubbleNetwork/hubble-device-sdk). This
 project showcases the development of a BLE (Bluetooth Low Energy)
 application using FreeRTOS, leveraging the capabilities of both SDKs.
 
