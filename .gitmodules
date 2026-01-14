@@ -1,3 +1,3 @@
 [submodule "hubble-sdk"]
 	path = hubble-sdk
-	url = https://github.com/HubbleNetwork/sdk.git
+	url = https://github.com/HubbleNetwork/hubble-device-sdk.git
