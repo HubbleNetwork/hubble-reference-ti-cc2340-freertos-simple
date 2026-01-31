@@ -249,3 +249,17 @@ clean:
 	@ echo Cleaning...
 	$(V) $(RM) -rf $(BUILD_DIR) > $(DEVNULL) 2>&1
 	$(V) $(RM) $(call SLASH_FIXUP,$(SYSCFG_FILES)) > $(DEVNULL) 2>&1
+
+# Memory size analysis targets
+.PHONY: size size-detail size-json
+
+size: $(BUILD_DIR)/$(NAME).out $(BUILD_DIR)/$(NAME).map
+	@echo "Analyzing firmware memory usage..."
+	@bash scripts/analyze_memory.sh $(BUILD_DIR)/$(NAME).map summary
+
+size-detail: $(BUILD_DIR)/$(NAME).out $(BUILD_DIR)/$(NAME).map
+	@echo "Analyzing firmware memory usage (detailed)..."
+	@bash scripts/analyze_memory.sh $(BUILD_DIR)/$(NAME).map detailed
+
+size-json: $(BUILD_DIR)/$(NAME).out $(BUILD_DIR)/$(NAME).map
+	@bash scripts/analyze_memory.sh $(BUILD_DIR)/$(NAME).map json
