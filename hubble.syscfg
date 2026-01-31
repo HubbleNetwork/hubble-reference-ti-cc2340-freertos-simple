@@ -70,7 +70,7 @@ if(lpName == "LP_EM_CC2745R10_Q1")
 {
     nvs.internalFlash.regionBase   = 0xE5000;
 }
-nvs.internalFlash.regionSize   = 0x3000;
+nvs.internalFlash.regionSize   = 0x1000;
 nvs.$name = "CONFIG_NVSINTERNAL";
 
 /* ======== RCL ======== */
@@ -110,7 +110,7 @@ for(var setting in ccfgSettings)
 const FreeRTOS    = scripting.addModule("/freertos/FreeRTOS");
 const Settings    = scripting.addModule("/ti/posix/freertos/Settings");
 
-FreeRTOS.heapSize         = 0x00004D50;
+FreeRTOS.heapSize         = 0x00003000;
 
 if (lpName.match(/CC27\d\d/))
 {
@@ -121,8 +121,8 @@ if (lpName == "LP_EM_CC2340R53")
     FreeRTOS.heapSize         = 0x0000A000;
 }
 
-FreeRTOS.timerStackSize       = 0x00000190;
-FreeRTOS.idleStackSize        = 0x00000130;
+FreeRTOS.timerStackSize       = 0x00000100;
+FreeRTOS.idleStackSize        = 0x000000C0;
 
 /* ======== BLE ======== */
 var ble = scripting.addModule("/ti/ble/ble");

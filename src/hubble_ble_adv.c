@@ -30,9 +30,9 @@ static ClockP_Params clockParams;
 /* Adv Task */
 static TaskP_Struct taskStruct;
 static TaskP_Handle taskHandle;
-static uint8_t advStack[2048];
+static uint8_t advStack[1024];
 static TaskP_Params taskParams = {
-	.stackSize = 2048,
+	.stackSize = 1024,
 	.stack = advStack,
 };
 
@@ -96,10 +96,11 @@ static int _adv_timer_setup(void)
 static void hubble_ble_adv_update(void *arg)
 {
 	(void)arg;
+	static const char* hello = "Hello";
 
 	size_t len = BLE_ADV_LEN - HUBBLE_BLE_ADV_HEADER_SIZE;
 	int status = hubble_ble_advertise_get(
-		NULL, 0, &advData[HUBBLE_BLE_ADV_HEADER_SIZE], &len);
+		(const uint8_t*)hello, strlen(hello), &advData[HUBBLE_BLE_ADV_HEADER_SIZE], &len);
 
 	if (status) {
 		return;

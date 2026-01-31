@@ -24,7 +24,7 @@
 /* of the regions                                                            */
 #include "ti_utils_build_linker.cmd.genmap"
 
---stack_size=1024
+--stack_size=512
 --heap_size=0
 --entry_point resetISR
 

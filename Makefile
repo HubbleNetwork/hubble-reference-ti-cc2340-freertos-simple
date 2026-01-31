@@ -35,7 +35,6 @@ OBJECTS = $(addprefix $(BUILD_DIR)/, \
 	  app_main.obj \
 	  app_hubble_ble_adv.obj \
 	  app_b64.obj \
-	  common_Services_dev_info_dev_info_service.obj \
 	  common_BLEAppUtil_bleapputil_task.obj \
 	  common_BLEAppUtil_bleapputil_init.obj \
 	  common_BLEAppUtil_bleapputil_process.obj \
@@ -49,7 +48,6 @@ OBJECTS = $(addprefix $(BUILD_DIR)/, \
 	  common_iCall_icall_user_config.obj \
 	  common_iCall_icall_POSIX.obj \
 	  common_config_ble_user_config.obj \
-	  common_Profiles_simple_gatt_simple_gatt_profile.obj \
 	  common_BLE_SysStat_blesysstat.obj \
 	  $(patsubst %.c,%.obj,$(notdir $(SYSCFG_C_FILES))))
 
@@ -74,11 +72,12 @@ CFLAGS += -I. \
 	  -mlittle-endian \
 	  -std=gnu99 \
 	  -ffunction-sections \
+	  -fdata-sections \
 	  -g \
 	  -Oz \
 	  -DCC23X0 \
 	  -DNVOCMP_NWSAMEITEM=1 \
-	  -DNVOCMP_NVPAGES=6 \
+	  -DNVOCMP_NVPAGES=2 \
 	  -DFREERTOS \
 	  -DNVOCMP_POSIX_MUTEX \
 	  -Wunused-function \
@@ -92,6 +91,7 @@ LFLAGS += -Wl,--diag_wrap=off \
 	  -Wl,--display_error_number \
 	  -Wl,-x \
 	  -Wl,-c \
+	  -Wl,--unused_section_elimination=on \
 	  -Wl,-m,$(BUILD_DIR)/$(NAME).map \
 	  -Wl,--rom_model \
 	  -Wl,--warn_sections \
@@ -100,6 +100,18 @@ LFLAGS += -Wl,--diag_wrap=off \
 	  $(BUILD_DIR)/ti_utils_build_linker.cmd.genlibs \
 	  $(BUILD_DIR)/cc2340_freertos.cmd \
 	  -llibc.a
+
+# Production build configuration
+.PHONY: release
+release: CFLAGS := $(filter-out -g -gdwarf-3,$(CFLAGS))
+release: CFLAGS += -DPRODUCTION_BUILD
+release: all
+
+# Optional: Disable trace facility for production
+.PHONY: release-minimal
+release-minimal: CFLAGS := $(filter-out -g -gdwarf-3,$(CFLAGS))
+release-minimal: CFLAGS += -DPRODUCTION_BUILD -DconfigUSE_TRACE_FACILITY=0
+release-minimal: all
 
 all: $(BUILD_DIR) postbuild
 
@@ -172,10 +184,6 @@ $(BUILD_DIR)/common_BLE_SysStat_blesysstat.obj: $(SIMPLELINK_LOWPOWER_F3_SDK_INS
 	@ echo Building $@
 	$(V) $(CC) $(CFLAGS) -c $< -o $@
 
-$(BUILD_DIR)/common_Services_dev_info_dev_info_service.obj: $(SIMPLELINK_LOWPOWER_F3_SDK_INSTALL_DIR)/source/ti/ble/services/dev_info/src/dev_info_service.c $(SYSCFG_H_FILES) $(BUILD_DIR)
-	@ echo Building $@
-	$(V) $(CC) $(CFLAGS) -c $< -o $@
-
 $(BUILD_DIR)/common_BLEAppUtil_bleapputil_task.obj: $(SIMPLELINK_LOWPOWER_F3_SDK_INSTALL_DIR)/source/ti/ble/app_util/framework/src/bleapputil_task.c $(SYSCFG_H_FILES) $(BUILD_DIR)
 	@ echo Building $@
 	$(V) $(CC) $(CFLAGS) -c $< -o $@
@@ -232,10 +240,6 @@ $(BUILD_DIR)/app_hubble_ble_adv.obj: src/hubble_ble_adv.c $(SYSCFG_H_FILES) $(BU
 $(BUILD_DIR)/app_b64.obj: src/b64.c $(SYSCFG_H_FILES) $(BUILD_DIR)
 	@ echo Building $@
 	$(V) $(CC) $(CFLAGS) $(HUBBLENETWORK_SDK_BLE_FLAGS) -c $< -o $@
-
-$(BUILD_DIR)/common_Profiles_simple_gatt_simple_gatt_profile.obj: $(SIMPLELINK_LOWPOWER_F3_SDK_INSTALL_DIR)/source/ti/ble/profiles/simple_gatt/src/simple_gatt_profile.c $(SYSCFG_H_FILES) $(BUILD_DIR)
-	@ echo Building $@
-	$(V) $(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/common_iCall_icall_POSIX.obj: $(SIMPLELINK_LOWPOWER_F3_SDK_INSTALL_DIR)/source/ti/ble/stack_util/icall/app/src/icall_POSIX.c $(SYSCFG_H_FILES) $(BUILD_DIR)
 	@ echo Building $@

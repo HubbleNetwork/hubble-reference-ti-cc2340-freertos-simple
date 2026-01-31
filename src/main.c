@@ -27,7 +27,7 @@ icall_userCfg_t user0Cfg = BLE_USER_CFG;
 
 BLEAppUtil_GeneralParams_t appMainParams = {
 	.taskPriority = 1,
-	.taskStackSize = 4096,
+	.taskStackSize = 2048,
 	.profileRole = (BLEAppUtil_Profile_Roles_e)(HOST_CONFIG),
 	.addressMode = DEFAULT_ADDRESS_MODE,
 	.deviceNameAtt = attDeviceName,
@@ -84,6 +84,25 @@ void App_StackInitDoneHandler(gapDeviceInitDoneEvent_t *deviceInitDoneData)
 	if (status != SUCCESS) {
 		/* TODO: Call Error Handler */
 	}
+}
+
+/* Memory monitoring function for runtime analysis */
+void monitor_memory_usage(void)
+{
+	size_t heap_free = xPortGetFreeHeapSize();
+	size_t heap_min = xPortGetMinimumEverFreeHeapSize();
+
+	/* TODO: Log or store these values for analysis
+	 * If heap_min < 2048 bytes, heap size needs to be increased
+	 * This function should be called periodically during testing
+	 * to validate heap size is adequate under all conditions
+	 */
+
+	/* TODO: Monitor task stacks
+	 * UBaseType_t ble_stack_wm = uxTaskGetStackHighWaterMark(ble_task_handle);
+	 * UBaseType_t adv_stack_wm = uxTaskGetStackHighWaterMark(adv_task_handle);
+	 * Watermark < 256 words (1 KB) indicates potential overflow risk
+	 */
 }
 
 int main()
