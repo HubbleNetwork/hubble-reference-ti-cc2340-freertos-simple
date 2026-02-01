@@ -36,13 +36,14 @@ To build and run this project, you will need:
 1. **Install Dependencies**
 
 Ensure that the TI SDK is installed on your
-system. Set *SYSCONFIG_TOOL*, *SIMPLELINK_LOWPOWER_F3_SDK_INSTALL_DIR* and *TICLANG_ARMCOMPILER*
+system. Set *SYSCONFIG_TOOL*, *SIMPLELINK_LOWPOWER_F3_SDK_INSTALL_DIR*, *TICLANG_ARMCOMPILER*, and *DSLITE*
 environment variables. e.g:
 
 ```bash
 export TICLANG_ARMCOMPILER=/Applications/ti/ccs2040/ccs/tools/compiler/ti-cgt-armllvm_4.0.4.LTS/
 export SIMPLELINK_LOWPOWER_F3_SDK_INSTALL_DIR=/Applications/ti/simplelink_lowpower_f3_sdk_9_14_00_41
 export SYSCONFIG_TOOL=/Applications/ti/sysconfig_1.23.2/sysconfig_cli.sh
+export DSLITE=/Applications/ti/UniFlash/dslite.sh
 ```
 
 This application has only been tested with the versions shown above.
@@ -65,7 +66,17 @@ make KEY=<YOUR_KEY>
 
 4. **Flash the Firmware**
 
-Flash the generated firmware (*hubble-simple.out/hex*) onto the target device using your preferred flashing tool.
+Flash the generated firmware to the CC2340R5 device:
+
+```bash
+make flash
+```
+
+This will automatically build the firmware (if needed) and program it to the connected device using TI's UniFlash DSLite tool.
+
+**Requirements**:
+- TI UniFlash must be installed and the `DSLITE` environment variable must be set (see step 1)
+- CC2340R5 development board must be connected via USB
 
 ### Usage
 

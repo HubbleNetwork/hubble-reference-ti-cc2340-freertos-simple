@@ -6,6 +6,7 @@ NAME = hubble-simple
 BUILD_DIR ?= build
 
 KEY ?= 1111111111111111111111==
+DSLITE ?= /Applications/ti/UniFlash/dslite.sh
 
 # Set Hubble config values
 CFLAGS += -DHUBBLE_KEY=$(KEY)
@@ -267,3 +268,9 @@ size-detail: $(BUILD_DIR)/$(NAME).out $(BUILD_DIR)/$(NAME).map
 
 size-json: $(BUILD_DIR)/$(NAME).out $(BUILD_DIR)/$(NAME).map
 	@bash scripts/analyze_memory.sh $(BUILD_DIR)/$(NAME).map json
+
+# Flash target for programming the CC2340R5
+.PHONY: flash
+flash: $(BUILD_DIR)/$(NAME).hex
+	@echo "Flashing $(BUILD_DIR)/$(NAME).hex to CC2340R5..."
+	$(DSLITE) --config=CC2340R53.ccxml --verbose $(BUILD_DIR)/$(NAME).hex
