@@ -2,8 +2,15 @@ SIMPLELINK_LOWPOWER_F3_SDK_INSTALL_DIR ?= simplelink-lowpower-f3-sdk
 HUBBLE_NETWORK_SDK ?= hubble-sdk
 NAME = hubble-simple
 
-# Build directory for all artifacts
-BUILD_DIR ?= build
+# Board: LP_EM_CC2340R5 (default, covers R52) or LP_EM_CC2340R53
+BOARD ?= LP_EM_CC2340R5
+VALID_BOARDS := LP_EM_CC2340R5 LP_EM_CC2340R53
+ifeq ($(filter $(BOARD),$(VALID_BOARDS)),)
+  $(error Invalid BOARD=$(BOARD). Valid: $(VALID_BOARDS))
+endif
+
+# Build directory for all artifacts (per-board to avoid cross-contamination)
+BUILD_DIR ?= build/$(BOARD)
 
 KEY ?= 1111111111111111111111==
 DSLITE ?= /Applications/ti/UniFlash/dslite.sh
@@ -19,8 +26,8 @@ CC = "$(TICLANG_ARMCOMPILER)/bin/tiarmclang"
 LNK = "$(TICLANG_ARMCOMPILER)/bin/tiarmclang"
 
 SYSCONFIG_GUI_TOOL = $(dir $(SYSCONFIG_TOOL))sysconfig_gui$(suffix $(SYSCONFIG_TOOL))
-SYSCFG_CMD_STUB = $(SYSCONFIG_TOOL) --compiler ticlang --product $(SIMPLELINK_LOWPOWER_F3_SDK_INSTALL_DIR)/.metadata/product.json
-SYSCFG_GUI_CMD_STUB = $(SYSCONFIG_GUI_TOOL) --compiler ticlang --product $(SIMPLELINK_LOWPOWER_F3_SDK_INSTALL_DIR)/.metadata/product.json
+SYSCFG_CMD_STUB = $(SYSCONFIG_TOOL) --compiler ticlang --product $(SIMPLELINK_LOWPOWER_F3_SDK_INSTALL_DIR)/.metadata/product.json --board /ti/boards/$(BOARD)
+SYSCFG_GUI_CMD_STUB = $(SYSCONFIG_GUI_TOOL) --compiler ticlang --product $(SIMPLELINK_LOWPOWER_F3_SDK_INSTALL_DIR)/.metadata/product.json --board /ti/boards/$(BOARD)
 SYSCFG_FILES := $(shell $(SYSCFG_CMD_STUB) --listGeneratedFiles --listReferencedFiles --output $(BUILD_DIR) hubble.syscfg)
 
 SYSCFG_C_FILES = $(filter %.c,$(SYSCFG_FILES))
@@ -266,8 +273,15 @@ size-detail: $(BUILD_DIR)/$(NAME).out $(BUILD_DIR)/$(NAME).map
 size-json: $(BUILD_DIR)/$(NAME).out $(BUILD_DIR)/$(NAME).map
 	@bash scripts/analyze_memory.sh $(BUILD_DIR)/$(NAME).map json
 
-# Flash target for programming the CC2340R5
+# Map board to ccxml file for flashing
+ifeq ($(BOARD),LP_EM_CC2340R53)
+  CCXML_FILE = CC2340R53.ccxml
+else
+  CCXML_FILE = CC2340R5.ccxml
+endif
+
+# Flash target for programming the device
 .PHONY: flash
 flash: $(BUILD_DIR)/$(NAME).hex
-	@echo "Flashing $(BUILD_DIR)/$(NAME).hex to CC2340R5..."
-	$(DSLITE) --config=CC2340R53.ccxml --verbose $(BUILD_DIR)/$(NAME).hex
+	@echo "Flashing $(BUILD_DIR)/$(NAME).hex ($(BOARD))..."
+	$(DSLITE) --config=$(CCXML_FILE) --verbose $(BUILD_DIR)/$(NAME).hex
