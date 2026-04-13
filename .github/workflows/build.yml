@@ -1,0 +1,90 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  TICLANG_VERSION: "4.0.4.LTS"
+  SYSCONFIG_VERSION: "1.27.0_4565"
+  TI_TOOLS_DIR: /opt/ti
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Cache TI tools
+        id: cache-ti-tools
+        uses: actions/cache@v4
+        with:
+          path: /opt/ti
+          key: ti-tools-ticlang-${{ env.TICLANG_VERSION }}-sysconfig-${{ env.SYSCONFIG_VERSION }}
+
+      - name: Install TI ARM Clang
+        if: steps.cache-ti-tools.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p $TI_TOOLS_DIR
+          curl -fSL -o /tmp/ticlang.bin \
+            "https://dr-download.ti.com/software-development/ide-configuration-compiler-or-debugger/MD-ayxs93eZNN/${TICLANG_VERSION}/ti_cgt_armllvm_${TICLANG_VERSION}_linux-x64_installer.bin"
+          chmod +x /tmp/ticlang.bin
+          /tmp/ticlang.bin --mode unattended --prefix $TI_TOOLS_DIR
+          rm /tmp/ticlang.bin
+
+      - name: Install SysConfig
+        if: steps.cache-ti-tools.outputs.cache-hit != 'true'
+        run: |
+          curl -fSL -o /tmp/sysconfig.run \
+            "https://dr-download.ti.com/software-development/ide-configuration-compiler-or-debugger/MD-nsUM6f7Vvb/${SYSCONFIG_VERSION//_/.}/sysconfig-${SYSCONFIG_VERSION}-setup.run"
+          chmod +x /tmp/sysconfig.run
+          /tmp/sysconfig.run --mode unattended --prefix $TI_TOOLS_DIR
+          rm /tmp/sysconfig.run
+
+      - name: Verify TI tools installation
+        run: |
+          echo "=== TI tools directory ==="
+          ls $TI_TOOLS_DIR/
+          echo "=== Looking for tiarmclang ==="
+          find $TI_TOOLS_DIR -name tiarmclang -type f | head -5
+          echo "=== Looking for sysconfig_cli ==="
+          find $TI_TOOLS_DIR -name "sysconfig_cli*" -type f | head -5
+
+      - name: Cache SDK libraries
+        id: cache-sdk-libs
+        uses: actions/cache@v4
+        with:
+          path: simplelink-lowpower-f3-sdk/source/**/lib
+          key: sdk-libs-ticlang-${{ env.TICLANG_VERSION }}-${{ hashFiles('simplelink-lowpower-f3-sdk/source/CMakeLists.txt', 'simplelink-lowpower-f3-sdk/CMakeLists.txt') }}
+
+      - name: Build SDK libraries
+        if: steps.cache-sdk-libs.outputs.cache-hit != 'true'
+        env:
+          TICLANG_ARMCOMPILER: /opt/ti/ti-cgt-armllvm_${{ env.TICLANG_VERSION }}
+          CMAKE: cmake
+        run: make -C simplelink-lowpower-f3-sdk build-ticlang
+
+      - name: Build firmware
+        env:
+          TICLANG_ARMCOMPILER: /opt/ti/ti-cgt-armllvm_${{ env.TICLANG_VERSION }}
+          SYSCONFIG_TOOL: /opt/ti/sysconfig_cli.sh
+        run: make
+
+      - name: Memory usage
+        env:
+          TICLANG_ARMCOMPILER: /opt/ti/ti-cgt-armllvm_${{ env.TICLANG_VERSION }}
+          SYSCONFIG_TOOL: /opt/ti/sysconfig_cli.sh
+        run: make size
+
+      - name: Upload firmware artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware
+          path: |
+            build/hubble-simple.hex
+            build/hubble-simple.out
+            build/hubble-simple.map

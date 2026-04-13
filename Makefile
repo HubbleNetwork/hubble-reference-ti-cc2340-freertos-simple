@@ -1,4 +1,4 @@
-SIMPLELINK_LOWPOWER_F3_SDK_INSTALL_DIR ?= $(abspath ../../../../../../..)
+SIMPLELINK_LOWPOWER_F3_SDK_INSTALL_DIR ?= simplelink-lowpower-f3-sdk
 HUBBLE_NETWORK_SDK ?= hubble-sdk
 NAME = hubble-simple
 
@@ -7,6 +7,7 @@ BUILD_DIR ?= build
 
 KEY ?= 1111111111111111111111==
 DSLITE ?= /Applications/ti/UniFlash/dslite.sh
+CRC_TOOL ?= $(SIMPLELINK_LOWPOWER_F3_SDK_INSTALL_DIR)/tools/common/crc_tool/crc_tool
 
 # Set Hubble config values
 CFLAGS += -DHUBBLE_KEY=$(KEY)
@@ -49,7 +50,6 @@ OBJECTS = $(addprefix $(BUILD_DIR)/, \
 	  common_iCall_icall_user_config.obj \
 	  common_iCall_icall_POSIX.obj \
 	  common_config_ble_user_config.obj \
-	  common_BLE_SysStat_blesysstat.obj \
 	  $(patsubst %.c,%.obj,$(notdir $(SYSCFG_C_FILES))))
 
 
@@ -122,7 +122,7 @@ $(BUILD_DIR):
 
 .PHONY: postbuild
 postbuild: $(BUILD_DIR)/$(NAME).out
-	$(SIMPLELINK_LOWPOWER_F3_SDK_INSTALL_DIR)/tools/common/crc_tool/crc_tool patch-image --elf $(BUILD_DIR)/$(NAME).out --symbol-prefix ti_utils_build_GenMap_sym_CRC_CCFG -o $(BUILD_DIR)/$(NAME).out
+	$(CRC_TOOL) patch-image --elf $(BUILD_DIR)/$(NAME).out --symbol-prefix ti_utils_build_GenMap_sym_CRC_CCFG -o $(BUILD_DIR)/$(NAME).out
 	$(TICLANG_ARMCOMPILER)/bin/tiarmobjcopy -O ihex $(BUILD_DIR)/$(NAME).out $(BUILD_DIR)/$(NAME).hex
 
 .INTERMEDIATE: syscfg
@@ -181,10 +181,6 @@ $(BUILD_DIR)/app_main.obj: src/main.c $(SYSCFG_H_FILES) $(BUILD_DIR)
 	@ echo Building $@
 	$(V) $(CC) $(CFLAGS) $(HUBBLENETWORK_SDK_FLAGS) -c $< -o $@
 
-
-$(BUILD_DIR)/common_BLE_SysStat_blesysstat.obj: $(SIMPLELINK_LOWPOWER_F3_SDK_INSTALL_DIR)/source/ti/ble/stack_util/health_toolkit/src/ble_sys_stat.c $(SYSCFG_H_FILES) $(BUILD_DIR)
-	@ echo Building $@
-	$(V) $(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/common_BLEAppUtil_bleapputil_task.obj: $(SIMPLELINK_LOWPOWER_F3_SDK_INSTALL_DIR)/source/ti/ble/app_util/framework/src/bleapputil_task.c $(SYSCFG_H_FILES) $(BUILD_DIR)
 	@ echo Building $@
