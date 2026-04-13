@@ -5,6 +5,12 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      device_key:
+        description: 'Device key (base64-encoded, AES-128-CTR)'
+        required: true
+        type: string
 
 env:
   TICLANG_VERSION: "4.0.4.LTS"
@@ -15,6 +21,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Mask device key
+        if: inputs.device_key
+        run: echo "::add-mask::${{ inputs.device_key }}"
+
       - uses: actions/checkout@v4
         with:
           submodules: recursive
@@ -72,7 +82,7 @@ jobs:
         env:
           TICLANG_ARMCOMPILER: /opt/ti/ti-cgt-armllvm_${{ env.TICLANG_VERSION }}
           SYSCONFIG_TOOL: /opt/ti/sysconfig_cli.sh
-        run: make
+        run: make ${{ inputs.device_key && format('KEY={0}', inputs.device_key) || '' }}
 
       - name: Memory usage
         env:
