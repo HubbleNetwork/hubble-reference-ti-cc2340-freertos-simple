@@ -1,3 +1,7 @@
 [submodule "hubble-sdk"]
 	path = hubble-sdk
 	url = https://github.com/HubbleNetwork/hubble-device-sdk.git
+[submodule "simplelink-lowpower-f3-sdk"]
+	path = simplelink-lowpower-f3-sdk
+	url = https://github.com/TexasInstruments/simplelink-lowpower-f3-sdk.git
+	branch = lpf3-9.20_ea

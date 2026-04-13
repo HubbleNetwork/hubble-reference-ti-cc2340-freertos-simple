@@ -28,25 +28,33 @@ sample.
 To build and run this project, you will need:
 
 * A TI CC23xx development board (e.g., **LP_EM_CC2340R5**).
-* The [TI SDK](https://www.ti.com/tool/download/SIMPLELINK-LOWPOWER-F3-SDK) installed on your system.
+* The [TI SDK](https://github.com/TexasInstruments/simplelink-lowpower-f3-sdk) (included as a git submodule).
 * [TI toolchain](https://www.ti.com/tool/CCSTUDIO)
 
 ### Setup Instructions
 
 1. **Install Dependencies**
 
-Ensure that the TI SDK is installed on your
-system. Set *SYSCONFIG_TOOL*, *SIMPLELINK_LOWPOWER_F3_SDK_INSTALL_DIR*, *TICLANG_ARMCOMPILER*, and *DSLITE*
-environment variables. e.g:
+Initialize the TI SDK submodule, build its libraries, and set the required tool environment variables:
 
 ```bash
+git submodule update --init --recursive
 export TICLANG_ARMCOMPILER=/Applications/ti/ccs2040/ccs/tools/compiler/ti-cgt-armllvm_4.0.4.LTS/
-export SIMPLELINK_LOWPOWER_F3_SDK_INSTALL_DIR=/Applications/ti/simplelink_lowpower_f3_sdk_9_14_00_41
 export SYSCONFIG_TOOL=/Applications/ti/sysconfig_1.23.2/sysconfig_cli.sh
 export DSLITE=/Applications/ti/UniFlash/dslite.sh
 ```
 
-This application has only been tested with the versions shown above.
+Build the SDK libraries (one-time step):
+
+```bash
+make -C simplelink-lowpower-f3-sdk build-ticlang
+```
+
+**macOS note:** The SDK's bundled `crc_tool` binary is Linux-only. On macOS, set `CRC_TOOL` to a macOS-compatible version (e.g. from a local TI SDK installation):
+
+```bash
+export CRC_TOOL=/Applications/ti/simplelink_lowpower_f3_sdk_9_14_00_41/tools/common/crc_tool/crc_tool
+```
 
 2. **Acquire a Device Key**
 
