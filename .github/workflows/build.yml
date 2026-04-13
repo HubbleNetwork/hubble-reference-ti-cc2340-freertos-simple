@@ -20,6 +20,9 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        board: [LP_EM_CC2340R5, LP_EM_CC2340R53]
     steps:
       - name: Mask device key
         if: inputs.device_key
@@ -85,19 +88,19 @@ jobs:
           TICLANG_ARMCOMPILER: /opt/ti/ti-cgt-armllvm_${{ env.TICLANG_VERSION }}
           SYSCONFIG_TOOL: /opt/ti/sysconfig_cli.sh
           DEVICE_KEY: ${{ inputs.device_key }}
-        run: make ${DEVICE_KEY:+KEY=$DEVICE_KEY}
+        run: make BOARD=${{ matrix.board }} ${DEVICE_KEY:+KEY=$DEVICE_KEY}
 
       - name: Memory usage
         env:
           TICLANG_ARMCOMPILER: /opt/ti/ti-cgt-armllvm_${{ env.TICLANG_VERSION }}
           SYSCONFIG_TOOL: /opt/ti/sysconfig_cli.sh
-        run: make size
+        run: make BOARD=${{ matrix.board }} size
 
       - name: Upload firmware artifact
         uses: actions/upload-artifact@v4
         with:
-          name: firmware
+          name: firmware-${{ matrix.board }}
           path: |
-            build/hubble-simple.hex
-            build/hubble-simple.out
-            build/hubble-simple.map
+            build/${{ matrix.board }}/hubble-simple.hex
+            build/${{ matrix.board }}/hubble-simple.out
+            build/${{ matrix.board }}/hubble-simple.map
