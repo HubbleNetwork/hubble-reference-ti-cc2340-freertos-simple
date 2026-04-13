@@ -75,7 +75,7 @@ void App_StackInitDoneHandler(gapDeviceInitDoneEvent_t *deviceInitDoneData)
 		return;
 	}
 
-	err = hubble_init((uint64_t)HUBBLE_TIME_S * 1000, master_key);
+	err = hubble_init(0, master_key);
 	if (err != 0) {
 		return;
 	}

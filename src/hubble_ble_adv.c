@@ -16,7 +16,7 @@
 #define HUBBLE_BLE_ADV_HEADER                                                  \
 	0x03, GAP_ADTYPE_16BIT_COMPLETE, LO_UINT16(0xfca6), HI_UINT16(0xfca6), \
 		0x01, GAP_ADTYPE_SERVICE_DATA,
-#define HUBBLE_BLE_ADV_HEADER_SIZE 6
+#define BLE_AD_HEADER_SIZE 6
 
 /* Period to update adv packets in microseconds */
 #define HUBBLE_ADV_PACKET_PERIOD   180000000UL
@@ -98,9 +98,9 @@ static void hubble_ble_adv_update(void *arg)
 	(void)arg;
 	static const char* hello = "Hello";
 
-	size_t len = BLE_ADV_LEN - HUBBLE_BLE_ADV_HEADER_SIZE;
+	size_t len = BLE_ADV_LEN - BLE_AD_HEADER_SIZE;
 	int status = hubble_ble_advertise_get(
-		(const uint8_t*)hello, strlen(hello), &advData[HUBBLE_BLE_ADV_HEADER_SIZE], &len);
+		(const uint8_t*)hello, strlen(hello), &advData[BLE_AD_HEADER_SIZE], &len);
 
 	if (status) {
 		return;
@@ -143,13 +143,13 @@ bStatus_t hubble_ble_adv_start(void)
 		return (FAILURE);
 	}
 
-	len = BLE_ADV_LEN - HUBBLE_BLE_ADV_HEADER_SIZE;
+	len = BLE_ADV_LEN - BLE_AD_HEADER_SIZE;
 	if (hubble_ble_advertise_get(
-		    NULL, 0, &advData[HUBBLE_BLE_ADV_HEADER_SIZE], &len) != 0) {
+		    NULL, 0, &advData[BLE_AD_HEADER_SIZE], &len) != 0) {
 		return (FAILURE);
 	}
 
-	memcpy(&advData[HUBBLE_BLE_ADV_HEADER_SIZE], data, len);
+	memcpy(&advData[BLE_AD_HEADER_SIZE], data, len);
 	advData[4] = len + 1; /* output len + BLE service data type */
 
 	status = BLEAppUtil_initAdvSet(&bleAdvHandle, &hubbleInitAdvSet);
