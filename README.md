@@ -60,7 +60,9 @@ export CRC_TOOL=/Applications/ti/simplelink_lowpower_f3_sdk_9_14_00_41/tools/com
 
 Acquire a device key from Hubble. This will be a base64 encoded string.
 
-**NOTE!** This application only supports 128-bit keys, so when requesting a key from Hubble, use the ```AES-128-CTR``` variant for the ```"encryption"``` key.
+**Important:**
+a. This application only supports 128-bit keys, so when requesting a key from Hubble, use the ```AES-128-CTR``` variant for the ```"encryption"``` key.
+b. This application uses device uptime for EID rotation (timeless encryption). When registering your device, set ```counter_source``` to ```"DEVICE_UPTIME"``` in the ```eid_rotation``` configuration. If the device registration does not match, your packets will be rejected.
 
 If you wish to just test your device locally, you can exclude the ```KEY``` value when invoking ```make``` below and the key will default to ```1111111111111111111111==```. This will enable local testing but your device will not show up in the backend.
 
