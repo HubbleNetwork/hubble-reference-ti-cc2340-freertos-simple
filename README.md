@@ -88,6 +88,30 @@ This will automatically build the firmware (if needed) and program it to the con
 - TI UniFlash must be installed and the `DSLITE` environment variable must be set (see step 1)
 - CC2340R5 development board must be connected via USB
 
+### Build via GitHub Actions (no toolchain install required)
+
+If you don't want to install the TI toolchain locally, you can build firmware binaries directly in the cloud using GitHub Actions.
+
+1. **Fork this repository** on GitHub.
+
+2. **Go to the Actions tab** in your fork and enable workflows if prompted.
+
+3. **Run the build workflow:**
+   - Click **"Build"** in the left sidebar.
+   - Click **"Run workflow"** on the right.
+   - Enter your base64-encoded device key (AES-128-CTR) in the **Device key** input field.
+   - Click **"Run workflow"** to start the build.
+
+   The workflow builds firmware for both the CC2340R5 and CC2340R53 boards automatically.
+
+4. **Download the firmware:**
+   - Once the build completes, open the workflow run.
+   - Download the `firmware-LP_EM_CC2340R5` or `firmware-LP_EM_CC2340R53` artifact (contains `.hex`, `.out`, and `.map` files).
+
+5. **Flash the firmware** to your device using [TI UniFlash](https://www.ti.com/tool/UNIFLASH) — load the `.hex` file and program it to your connected CC2340 board.
+
+> **Note:** Your device key is masked in workflow logs and is not stored in the repository. However, since the key is baked into the firmware artifact, treat downloaded artifacts as sensitive.
+
 ### Usage
 
 Once the firmware is flashed:
